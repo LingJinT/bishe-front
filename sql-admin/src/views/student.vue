@@ -18,9 +18,6 @@
             <el-form-item label="班级">
               <el-input v-model="newStudent.classes"></el-input>
             </el-form-item>
-            <el-form-item label="密码">
-              <el-input v-model="newStudent.password"></el-input>
-            </el-form-item>
           </el-form>
           <span slot="footer" class="dialog-footer">
             <el-button @click="dialog = false">取 消</el-button>
@@ -74,7 +71,6 @@ export default {
       newStudent: {
         name: '',
         id: '',
-        password: '',
         classes: ''
       },
       tableData: [{

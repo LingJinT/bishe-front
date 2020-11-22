@@ -3,32 +3,6 @@
     <el-card>
       <div slot="header" class="clearfix">
         <span>所有课程</span>
-        <el-button
-          style="float: right; padding: 3px 0"
-          type="text"
-          @click="dialog = true"
-          >新增课程</el-button
-        >
-        <el-dialog title="新增课程" :visible.sync="dialog" width="30%">
-          <el-form label-position="left" label-width="80px" :model="newCourse">
-            <el-form-item label="课程名称">
-              <el-input v-model="newCourse.name"></el-input>
-            </el-form-item>
-            <el-form-item label="授课班级">
-              <el-input v-model="newCourse.id"></el-input>
-            </el-form-item>
-            <el-form-item label="授课老师">
-              <el-input v-model="newCourse.teacher"></el-input>
-            </el-form-item>
-            <el-form-item label="课程信息">
-              <el-input v-model="newCourse.info"></el-input>
-            </el-form-item>
-          </el-form>
-          <span slot="footer" class="dialog-footer">
-            <el-button @click="dialog = false">取 消</el-button>
-            <el-button type="primary" @click="confirm">确 定</el-button>
-          </span>
-        </el-dialog>
       </div>
       <el-table :data="tableData" style="width: 100%">
         <el-table-column label="课程名称">
