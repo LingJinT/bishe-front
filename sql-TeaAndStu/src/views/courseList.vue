@@ -105,7 +105,15 @@ export default {
     },
     toCount (index, row) {
       this.$router.push('/count')
+    },
+    async getCourseList () {
+      // const token = localStorage.getItem('token')
+      const res = await this.$axios.get('/courselist/')
+      console.log(res.data)
     }
+  },
+  created () {
+    this.getCourseList()
   }
 }
 </script>

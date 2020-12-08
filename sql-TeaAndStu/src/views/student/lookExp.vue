@@ -15,13 +15,13 @@
       </el-card>
       <el-card class="box-card" style="margin-top: 20px;">
         <div slot="header" class="clearfix">
-          <span>实验解析</span>
+          <span>实验答案</span>
         </div>
         <div>
-          <p>实验解析内容</p>
-          <p>实验解析内容</p>
-          <p>实验解析内容</p>
-          <p>实验解析内容</p>
+          <p>答案内容</p>
+          <p>答案内容</p>
+          <p>答案内容</p>
+          <p>答案内容</p>
         </div>
       </el-card>
     </el-main>

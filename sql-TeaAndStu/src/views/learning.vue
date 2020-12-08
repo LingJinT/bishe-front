@@ -15,6 +15,9 @@
         <el-form-item label="关键字">
           <el-input type="text" v-model="form.keywords"></el-input>
         </el-form-item>
+        <el-form-item label="链接">
+          <el-input type="text" v-model="form.link"></el-input>
+        </el-form-item>
         <el-form-item label="图片">
           <el-upload
             class="upload-demo"
@@ -46,7 +49,8 @@ export default {
       dialog: false,
       form: {
         name: '',
-        keywords: ''
+        keywords: '',
+        link: ''
       }
     }
   }

@@ -21,13 +21,14 @@
           </el-form>
           <span slot="footer" class="dialog-footer">
             <el-button @click="dialog = false">取 消</el-button>
-            <el-button type="primary" @click="confirm">确 定</el-button>
+            <el-button type="primary" @click="addStudent">确 定</el-button>
           </span>
         </el-dialog>
       </div>
       <el-table
         :data="tableData"
-        style="width: 100%">
+        style="width: 100%"
+        :default-sort = "{prop: 'userId', order: 'descending'}">
         <el-table-column
           label="名称">
           <template slot-scope="scope">
@@ -35,13 +36,17 @@
           </template>
         </el-table-column>
         <el-table-column
-          label="学号">
+          label="学号"
+          sortable
+          prop="userId">
           <template slot-scope="scope">
-              <p>{{ scope.row.id }}</p>
+              <p>{{ scope.row.userId }}</p>
           </template>
         </el-table-column>
         <el-table-column
-          label="班级">
+          label="班级"
+          sortable
+          prop="classes">
           <template slot-scope="scope">
               <p>{{ scope.row.classes }}</p>
           </template>
@@ -51,11 +56,35 @@
             <el-button
             size="mini"
             type="primary"
-            @click="handleReset(scope.$index, scope.row)">重置密码</el-button>
+            @click="updateStudent(scope.row.userId)">编辑</el-button>
+            <el-button
+            size="mini"
+            type="warning"
+            @click="resetPassword(scope.row.userId)">重置密码</el-button>
             <el-button
               size="mini"
               type="danger"
-              @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+              @click="deleteStudent(scope.row.userId)">删除</el-button>
+            <el-dialog
+              title="编辑学生"
+              :visible.sync="Editdialog"
+              width="30%">
+              <el-form label-position="left" label-width="80px" :model="tableData[index]">
+                <el-form-item label="名称">
+                  <el-input v-model="tableData[index].name"></el-input>
+                </el-form-item>
+                <el-form-item label="学号">
+                  <el-input v-model="tableData[index].userId"></el-input>
+                </el-form-item>
+                <el-form-item label="班级">
+                  <el-input v-model="tableData[index].classes"></el-input>
+                </el-form-item>
+              </el-form>
+              <span slot="footer" class="dialog-footer">
+                <el-button @click="Editdialog = false">取 消</el-button>
+                <el-button type="primary" @click="confirmUpdateStudent">确 定</el-button>
+              </span>
+            </el-dialog>
           </template>
         </el-table-column>
       </el-table>
@@ -68,47 +97,104 @@ export default {
   data () {
     return {
       dialog: false,
+      Editdialog: false,
+      index: 0,
       newStudent: {
         name: '',
         id: '',
         classes: ''
       },
-      tableData: [{
-        name: '学生0',
-        id: '2017082101',
-        password: '',
-        classes: '20170821'
-      }, {
-        name: '学生1',
-        id: '2017082102',
-        password: '',
-        classes: '20170822'
-      }, {
-        name: '学生2',
-        id: '2017082103',
-        password: '',
-        classes: '20170823'
-      }, {
-        name: '学生3',
-        id: '2017082104',
-        password: '',
-        classes: '20170824'
-      }]
+      tableData: []
     }
   },
   methods: {
-    handleReset (index) {
-      confirm('确认重置密码吗？')
-      console.log(`${index}重置密码`)
+    // 获取学生列表
+    async getStudentsList () {
+      const res = await this.$axios.get('/admin/student/getStudentsList')
+      if (res.data.code === 200) {
+        this.tableData = res.data.data
+      }
     },
-    handleDelete (index) {
-      confirm('确认删除吗？')
-      console.log(`${index}shanchu`)
+    // 增加学生
+    async addStudent () {
+      const res = await this.$axios.post('/admin/student/addStudent', this.newStudent)
+      if (res.data.code === 200) {
+        this.dialog = false
+        this.getStudentsList()
+        this.newStudent = {
+          name: '',
+          id: '',
+          classes: ''
+        }
+      }
     },
-    confirm () {
-      this.tableData.push(this.newStudent)
-      this.dialog = false
+    // 更新学生
+    updateStudent (id) {
+      this.tableData.map((item, index) => {
+        if (item.userId === id) {
+          this.index = index
+        }
+      })
+      this.Editdialog = true
+    },
+    async confirmUpdateStudent () {
+      const res = await this.$axios.put('/admin/student/updateStudent', this.tableData[this.index])
+      if (res.data.code === 200) {
+        this.Editdialog = false
+        this.$message({
+          type: 'success',
+          message: '修改成功'
+        })
+      }
+    },
+    // 重置密码
+    async resetPassword (id) {
+      this.$confirm('此操作将重置该学生的密码, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$axios.put('/admin/student/resetPassword', {
+          id
+        })
+        if (res.data.code === 200) {
+          this.$message({
+            type: 'success',
+            message: '重置成功'
+          })
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消重置'
+        })
+      })
+    },
+    // 删除学生
+    async deleteStudent (id) {
+      this.$confirm('此操作将永久删除该学生, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$axios.delete(`/admin/student/deleteStudent?id=${id}`)
+        if (res.data.code === 200) {
+          this.$message({
+            type: 'success',
+            message: '删除成功'
+          })
+          this.getStudentsList()
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     }
+  },
+  created () {
+    this.getStudentsList()
   }
 }
 </script>

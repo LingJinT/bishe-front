@@ -5,10 +5,10 @@
         <el-tab-pane label="用户名登录" name="first">
             <el-form ref="loginform" :model="form" label-width="80px">
               <el-form-item label="用户名">
-                <el-input v-model="form.name" placeholder='工号/邮箱/手机号'></el-input>
+                <el-input v-model="form.user" placeholder='工号/邮箱/手机号'></el-input>
               </el-form-item>
               <el-form-item label="密码">
-                <el-input v-model="form.name"></el-input>
+                <el-input v-model="form.password"></el-input>
               </el-form-item>
               <el-form-item label="特殊资源">
                 <el-radio-group v-model="form.resource">
@@ -52,14 +52,17 @@ export default {
     return {
       activeName: 'first',
       form: {
-        name: '',
+        user: '',
+        password: '',
         resource: ''
       },
       isLogin: true
     }
   },
   methods: {
-    login () {
+    async login () {
+      const res = await this.$axios.post('/login/', this.form)
+      localStorage.setItem('token', res.data.token)
       if (this.form.resource === '教师登录') {
         this.$router.push('/header')
       } else {

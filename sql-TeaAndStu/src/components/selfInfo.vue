@@ -8,6 +8,12 @@
       <el-form-item label="手机号">
         <el-input v-model="form.phoneNumber"></el-input>
       </el-form-item>
+      <el-form-item label="新密码">
+        <el-input v-model="form.password1"></el-input>
+      </el-form-item>
+      <el-form-item label="确认密码">
+        <el-input v-model="form.password2"></el-input>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" @click="dialog = false">修改</el-button>
         <el-button @click="dialog = false">取消</el-button>
@@ -22,7 +28,9 @@ export default {
     return {
       form: {
         email: '',
-        phoneNumber: ''
+        phoneNumber: '',
+        password1: '',
+        password2: ''
       }
     }
   },

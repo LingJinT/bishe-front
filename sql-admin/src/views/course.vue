@@ -12,7 +12,7 @@
         </el-table-column>
         <el-table-column label="授课班级">
           <template slot-scope="scope">
-            <p>{{ scope.row.id }}</p>
+            <p>{{ scope.row.teachClass }}</p>
           </template>
         </el-table-column>
         <el-table-column label="课程信息">
@@ -25,13 +25,13 @@
             <el-button
               size="mini"
               type="primary"
-              @click="handleEdit(scope.$index, scope.row)"
+              @click="dialogTrue(scope.$index)"
               >编辑</el-button
             >
             <el-button
               size="mini"
               type="danger"
-              @click="handleDelete(scope.$index, scope.row)"
+              @click="deleteCourse(scope.row._id)"
               >删除</el-button
             >
             <el-dialog title="编辑课程" :visible.sync="Editdialog" width="30%">
@@ -44,12 +44,7 @@
                   <el-input v-model="tableData[index].name"></el-input>
                 </el-form-item>
                 <el-form-item label="授课班级">
-                  <el-input v-model="tableData[index].id"></el-input>
-                </el-form-item>
-                <el-form-item label="授课老师">
-                  <el-input
-                    v-model="tableData[index].teacher"
-                  ></el-input>
+                  <el-input v-model="tableData[index].teachClass"></el-input>
                 </el-form-item>
                 <el-form-item label="课程信息">
                   <el-input v-model="tableData[index].info"></el-input>
@@ -57,7 +52,7 @@
               </el-form>
               <span slot="footer" class="dialog-footer">
                 <el-button @click="Editdialog = false">取 消</el-button>
-                <el-button type="primary" @click="Editdialog = false"
+                <el-button type="primary" @click="updateCourse"
                   >确 定</el-button
                 >
               </span>
@@ -74,51 +69,61 @@ export default {
   data () {
     return {
       Editdialog: false,
-      dialog: false,
       index: 0,
-      newCourse: {
-        name: '',
-        id: '',
-        teacher: '',
-        info: ''
-      },
-      tableData: [{
-        name: '课程0',
-        id: '2017082101',
-        teacher: '老师0',
-        info: 'info0'
-      }, {
-        name: '课程1',
-        id: '2017082102',
-        teacher: '老师1',
-        info: 'info1'
-      }, {
-        name: '课程2',
-        id: '2017082103',
-        teacher: '老师2',
-        info: 'info2'
-      }, {
-        name: '课程3',
-        id: '2017082104',
-        teacher: '老师3',
-        info: 'info3'
-      }]
+      tableData: []
     }
   },
   methods: {
-    handleEdit (index) {
+    // 获取课程列表
+    async getCourseList () {
+      const res = await this.$axios.get('/admin/course/getCourseList')
+      if (res.data.code === 200) {
+        this.Editdialog = false
+        this.tableData = res.data.data
+      }
+    },
+    // 弹出对话框
+    dialogTrue (index) {
       this.index = index
       this.Editdialog = true
-      console.log(`${index}编辑`)
     },
-    handleDelete (index) {
-      confirm('确认删除吗？')
-      console.log(`${index}删除`)
+    // 编辑课程
+    async updateCourse () {
+      const res = await this.$axios.put('/admin/course/updateCourse', this.tableData[this.index])
+      if (res.data.code === 200) {
+        this.$message({
+          type: 'success',
+          message: '修改成功'
+        })
+        this.Editdialog = false
+        this.getCourseList()
+      }
     },
-    confirm () {
-      this.tableData.push(this.newStudent)
-      this.dialog = false
+    // 删除课程
+    async deleteCourse (id) {
+      this.$confirm('此操作将永久删除该课程, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$axios.delete(`/admin/course/deleteCourse?id=${id}`)
+        if (res.data.code === 200) {
+          this.$message({
+            type: 'success',
+            message: '删除成功'
+          })
+          this.getCourseList()
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     }
+  },
+  created () {
+    this.getCourseList()
   }
 }
 </script>

@@ -18,7 +18,7 @@
           </el-form>
           <span slot="footer" class="dialog-footer">
             <el-button @click="dialog = false">取 消</el-button>
-            <el-button type="primary" @click="dialog = false">确 定</el-button>
+            <el-button type="primary" @click="addTeacher">确 定</el-button>
           </span>
         </el-dialog>
       </div>
@@ -28,7 +28,7 @@
         <el-table-column
           label="工号">
           <template slot-scope="scope">
-              <p>{{ scope.row.id }}</p>
+              <p>{{ scope.row.userId }}</p>
           </template>
         </el-table-column>
         <el-table-column
@@ -46,19 +46,40 @@
         <el-table-column
           label="手机号">
           <template slot-scope="scope">
-              <p>{{ scope.row.phoneNumber }}</p>
+              <p>{{ scope.row.phone }}</p>
           </template>
         </el-table-column>
         <el-table-column label="操作" min-width="100px">
           <template slot-scope="scope">
             <el-button
             size="mini"
+            type="primary"
+            @click="updateTeacher(scope.row.userId)">编辑</el-button>
+            <el-button
+            size="mini"
             type="warning"
-            @click="handleReset(scope.$index, scope.row)">重置密码</el-button>
+            @click="resetPassword(scope.row.userId)">重置密码</el-button>
             <el-button
               size="mini"
               type="danger"
-              @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+              @click="deleteTeacher(scope.row.userId)">删除</el-button>
+            <el-dialog
+              title="编辑教师"
+              :visible.sync="Editdialog"
+              width="30%">
+              <el-form label-position="left" label-width="80px" :model="tableData[index]">
+                <el-form-item label="姓名">
+                  <el-input v-model="tableData[index].name"></el-input>
+                </el-form-item>
+                <el-form-item label="工号">
+                  <el-input v-model="tableData[index].userId"></el-input>
+                </el-form-item>
+              </el-form>
+              <span slot="footer" class="dialog-footer">
+                <el-button @click="Editdialog = false">取 消</el-button>
+                <el-button type="primary" @click="confirmUpdateTeacher">确 定</el-button>
+              </span>
+            </el-dialog>
           </template>
         </el-table-column>
       </el-table>
@@ -71,42 +92,96 @@ export default {
   data () {
     return {
       dialog: false,
+      Editdialog: false,
+      index: 0,
       newTeacher: {
         name: '',
         id: ''
       },
-      tableData: [{
-        name: '老师0',
-        email: '0@qq..com',
-        id: 'user0',
-        phoneNumber: '123456789'
-      }, {
-        name: '老师1',
-        email: '1@qq..com',
-        id: 'user1',
-        phoneNumber: '123456789'
-      }, {
-        name: '老师2',
-        email: '2@qq..com',
-        id: 'user2',
-        phoneNumber: '123456789'
-      }, {
-        name: '老师3',
-        email: '3@qq..com',
-        id: 'user3',
-        phoneNumber: '123456789'
-      }]
+      tableData: []
     }
   },
   methods: {
-    handleReset (index) {
-      confirm('确认重置密码吗？')
-      console.log(`${index}重置密码`)
+    // 获取教师列表
+    async getTeacherList () {
+      const res = await this.$axios.get('/admin/teacher/getTeacherList')
+      this.tableData = res.data.data
     },
-    handleDelete (index) {
-      confirm('确认删除吗？')
-      console.log(`${index}shanchu`)
+    // 新建教师
+    async addTeacher () {
+      const res = await this.$axios.post('/admin/teacher/addTeacher', this.newTeacher)
+      if (res.data.code === 200) {
+        this.getTeacherList()
+        this.dialog = false
+      }
+    },
+    // 更新教师
+    updateTeacher (id) {
+      this.tableData.map((item, index) => {
+        if (item.userId === id) {
+          this.index = index
+        }
+      })
+      this.Editdialog = true
+    },
+    async confirmUpdateTeacher () {
+      const res = await this.$axios.put('/admin/teacher/updateTeacher', this.tableData[this.index])
+      if (res.data.code === 200) {
+        this.Editdialog = false
+        this.$message({
+          type: 'success',
+          message: '修改成功'
+        })
+      }
+    },
+    // 重置密码
+    async resetPassword (id) {
+      this.$confirm('此操作将重置该老师的密码, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$axios.put('/admin/teacher/resetPassword', {
+          id
+        })
+        if (res.data.code === 200) {
+          this.$message({
+            type: 'success',
+            message: '重置成功'
+          })
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消重置'
+        })
+      })
+    },
+    // 删除
+    async deleteTeacher (id) {
+      this.$confirm('此操作将永久删除该老师, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$axios.delete(`/admin/teacher/deleteTeacher?id=${id}`)
+        if (res.data.code === 200) {
+          this.$message({
+            type: 'success',
+            message: '删除成功'
+          })
+          this.getTeacherList()
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     }
+  },
+  created () {
+    this.getTeacherList()
   }
 }
 </script>
