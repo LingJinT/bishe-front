@@ -3,18 +3,21 @@
     <el-card>
       <el-tabs v-model="activeName">
         <el-tab-pane label="用户名登录" name="first">
-            <el-form ref="loginform" :model="form" label-width="80px">
-              <el-form-item label="用户名">
-                <el-input v-model="form.user" placeholder='工号/邮箱/手机号'></el-input>
+            <el-form ref="loginform" :model="form" label-width="80px" :rules="rules">
+              <el-form-item label="用户名" prop="username">
+                <el-input v-model="form.username" placeholder='工号/学号'></el-input>
               </el-form-item>
-              <el-form-item label="密码">
+              <el-form-item label="密码" prop="password">
                 <el-input v-model="form.password"></el-input>
               </el-form-item>
-              <el-form-item label="特殊资源">
+              <el-form-item label="特殊资源" prop="resource">
                 <el-radio-group v-model="form.resource">
                   <el-radio label="学生登录"></el-radio>
                   <el-radio label="教师登录"></el-radio>
                 </el-radio-group>
+              </el-form-item>
+              <el-form-item>
+                <div v-if="error" style="color: red">用户名密码错误</div>
               </el-form-item>
               <el-form-item>
                 <el-button type="primary" @click="login">登录</el-button>
@@ -22,7 +25,7 @@
             </el-form>
         </el-tab-pane>
         <el-tab-pane label="忘记密码" name="five">
-            <el-form ref="loginform" :model="form" label-width="80px">
+            <el-form ref="resetPassword" :model="form" label-width="80px">
               <el-form-item label="手机号">
                 <el-input v-model="form.name"></el-input>
               </el-form-item>
@@ -52,22 +55,49 @@ export default {
     return {
       activeName: 'first',
       form: {
-        user: '',
+        username: '',
         password: '',
         resource: ''
       },
-      isLogin: true
+      rules: {
+        username: [
+          { required: true, message: '必填', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '必填', trigger: 'blur' }
+        ],
+        resource: [
+          { required: true, message: '必填', trigger: 'blur' }
+        ]
+      },
+      error: false
     }
   },
   methods: {
     async login () {
-      const res = await this.$axios.post('/login/', this.form)
-      localStorage.setItem('token', res.data.token)
-      if (this.form.resource === '教师登录') {
-        this.$router.push('/header')
-      } else {
-        this.$router.push('/ScourseList')
-      }
+      this.$refs.loginform.validate(async (valid) => {
+        if (valid) {
+          if (this.form.resource === '教师登录') {
+            const res = await this.$axios.post('/teacher/login', this.form)
+            localStorage.setItem('token', res.data.token)
+            if (res.data.code === 200) {
+              this.$router.push('/header')
+            } else {
+              this.error = true
+            }
+          } else {
+            const res = await this.$axios.post('/student/login', this.form)
+            localStorage.setItem('token', res.data.token)
+            if (res.data.code === 200) {
+              this.$router.push('/ScourseList')
+            } else {
+              this.error = true
+            }
+          }
+        } else {
+          return false
+        }
+      })
     },
     register () {
       console.log('注册成功')

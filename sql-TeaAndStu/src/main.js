@@ -11,7 +11,7 @@ const service = axios.create({
 })
 service.interceptors.request.use(config => {
   const token = localStorage.getItem('token')
-  if (config.url === '/user/login' || config.url === '/user/token') {
+  if (config.url === '/teacher/login' || config.url === '/student/login') {
     return config
   }
   if (token) {
@@ -20,6 +20,7 @@ service.interceptors.request.use(config => {
   }
   return false
 })
+
 Vue.prototype.$axios = service
 Vue.config.productionTip = false
 Vue.prototype.$echarts = echarts

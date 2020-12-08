@@ -13,7 +13,6 @@ const service = axios.create({
 service.interceptors.request.use(config => {
   const token = localStorage.getItem('token')
   if (config.url === '/admin/login') {
-    console.log('走了这里')
     return config
   }
   if (token) {

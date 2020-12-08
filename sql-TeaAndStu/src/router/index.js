@@ -103,5 +103,14 @@ const routes = [
 const router = new VueRouter({
   routes
 })
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token')
+  if (to.path !== '/' && !token) {
+    console.log('触发了全局导航守卫')
+    next('/')
+  } else {
+    next()
+  }
+})
 
 export default router
