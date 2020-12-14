@@ -7,8 +7,7 @@
           <el-dialog
             title="修改课程信息"
             :visible.sync="editCourse"
-            width="30%"
-            :before-close="handleClose">
+            width="30%">
             <el-input
               type="textarea"
               autosize
@@ -16,8 +15,8 @@
               v-model="courseInfo">
             </el-input>
             <span slot="footer" class="dialog-footer">
-              <el-button @click="editCourse = false">取 消</el-button>
-              <el-button type="primary" @click="editCourse = false">确 定</el-button>
+              <el-button @click="cancelEdit">取 消</el-button>
+              <el-button type="primary" @click="editCourseInfo">确 定</el-button>
             </span>
           </el-dialog>
         </div>
@@ -32,39 +31,32 @@
           <el-dialog
             title="新建实验"
             :visible.sync="newExperiment"
-            width="30%"
-            :before-close="handleClose">
+            width="30%">
             <el-form label-position="left" label-width="80px" :model="formLabelAlign">
               <el-form-item label="实验名称">
                 <el-input v-model="formLabelAlign.name"></el-input>
               </el-form-item>
               <el-form-item label="实验内容">
-                <el-input v-model="formLabelAlign.content"></el-input>
+                <el-input v-model="formLabelAlign.content" type="textarea"></el-input>
               </el-form-item>
               <el-form-item label="分值">
-                <el-input v-model="formLabelAlign.grade"></el-input>
+                <el-input v-model="formLabelAlign.scope"></el-input>
               </el-form-item>
               <el-form-item label="答案">
                 <el-input v-model="formLabelAlign.answer"></el-input>
               </el-form-item>
               <el-form-item label="关键词">
-                <el-input v-model="formLabelAlign.keywords"></el-input>
-              </el-form-item>
-              <el-form-item label="数据库">
-                <el-select v-model="formLabelAlign.database" placeholder="请选择数据库">
-                  <el-option label="数据库一" value="shanghai"></el-option>
-                  <el-option label="数据库二" value="beijing"></el-option>
-                </el-select>
+                <el-input v-model="formLabelAlign.keyWords"></el-input>
               </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
               <el-button @click="newExperiment = false">取 消</el-button>
-              <el-button type="primary" @click="newExperiment = false">确 定</el-button>
+              <el-button type="primary" @click="addExperiment">确 定</el-button>
             </span>
           </el-dialog>
         </div>
         <el-table
-          :data="tableData"
+          :data="tableData.noPublic"
           style="width: 100%;">
           <el-table-column
             label="实验名称">
@@ -75,19 +67,13 @@
           <el-table-column
             label="分值">
             <template slot-scope="scope">
-              {{ scope.row.grade }}
-            </template>
-          </el-table-column>
-           <el-table-column
-            label="数据库类型">
-            <template slot-scope="scope">
-              {{ scope.row.database }}
+              {{ scope.row.scope }}
             </template>
           </el-table-column>
            <el-table-column
             label="关键词">
             <template slot-scope="scope">
-              {{ scope.row.keywords }}
+              {{ scope.row.keyWords }}
             </template>
           </el-table-column>
           <el-table-column label="操作" min-width=150px>
@@ -95,66 +81,67 @@
               <el-button
                 size="mini"
                 type="success"
-                @click="handleEdit(scope.$index, scope.row)"
+                @click="edit(scope.row._id)"
                 style="margin-right: 10px">编辑</el-button>
               <el-dialog
                 title="编辑实验"
                 :visible.sync="editExperiment"
-                width="30%"
-                :before-close="handleClose">
-                <el-form label-position="left" label-width="80px" :model="tableData[index]">
+                width="30%">
+                <el-form label-position="left" label-width="80px" :model="tableData.noPublic[index]">
                   <el-form-item label="实验名称">
-                    <el-input v-model="tableData[index].name"></el-input>
+                    <el-input v-model="tableData.noPublic[index].name"></el-input>
                   </el-form-item>
                   <el-form-item label="实验内容">
-                    <el-input v-model="tableData[index].content"></el-input>
+                    <el-input v-model="tableData.noPublic[index].content" type="textarea"></el-input>
                   </el-form-item>
                   <el-form-item label="分值">
-                    <el-input v-model="tableData[index].grade"></el-input>
+                    <el-input v-model="tableData.noPublic[index].scope"></el-input>
                   </el-form-item>
                   <el-form-item label="答案">
-                    <el-input v-model="tableData[index].answer"></el-input>
-                  </el-form-item>
-                  <el-form-item label="数据库">
-                    <el-input v-model="tableData[index].database"></el-input>
+                    <el-input v-model="tableData.noPublic[index].answer"></el-input>
                   </el-form-item>
                   <el-form-item label="关键词">
-                    <el-input v-model="tableData[index].keywords"></el-input>
+                    <el-input v-model="tableData.noPublic[index].keyWords"></el-input>
                   </el-form-item>
                 </el-form>
                 <span slot="footer" class="dialog-footer">
                   <el-button @click="editExperiment = false">取 消</el-button>
-                  <el-button type="primary" @click="editExperiment = false">确 定</el-button>
+                  <el-button type="primary" @click="updateExperiment(tableData.noPublic[index]._id)">确 定</el-button>
                 </span>
               </el-dialog>
               <el-button
                 size="mini"
                 type="danger"
-                @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                @click="deleteExperiment(scope.row._id)">删除</el-button>
               <el-button
                 size="mini"
                 type="primary"
-                @click="handlePublish(scope.$index, scope.row)"
+                @click="dialogVisible = true"
                 style="margin-right: 10px">发布</el-button>
               <el-dialog
-                title="提示"
+                title="发布实验"
                 :visible.sync="dialogVisible"
                 width="30%">
-                <span class="demonstration">日期</span>
+                <span class="demonstration" style="margin-right: 20px">设置截止日期</span>
                   <el-date-picker
-                    v-model="tableData[index].date"
+                    v-model="date"
                     type="date"
-                    placeholder="选择日期">
+                    placeholder="选择截止日期"
+                    value-format="yyyy-MM-dd">
                   </el-date-picker>
                 <span slot="footer" class="dialog-footer">
                   <el-button @click="dialogVisible = false">取 消</el-button>
-                  <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+                  <el-button type="primary" @click="publicExperiment(scope.row._id, scope.row.courseId, scope.row.name, scope.row.classes)">确 定</el-button>
                 </span>
               </el-dialog>
               <el-button
                 size="mini"
                 type="warning"
-                @click="handleShare(scope.$index, scope.row)">共享</el-button>
+                @click="shareExperiment(scope.row._id)" v-if="!scope.row.isShare">共享</el-button>
+              <el-button
+                size="mini"
+                type="warning"
+                v-else @click="noShare(scope.row._id)">取消共享</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -164,13 +151,13 @@
           <span>已发布实验列表</span>
         </div>
         <el-table
-          :data="tableData"
+          :data="tableData.public"
           style="width: 100%;">
           <el-table-column
             label="截止时间">
             <template slot-scope="scope">
               <i class="el-icon-time"></i>
-              <span style="margin-left: 10px">{{ scope.row.data }}</span>
+              <span style="margin-left: 10px">{{ scope.row.deadline }}</span>
             </template>
           </el-table-column>
           <el-table-column
@@ -182,31 +169,33 @@
           <el-table-column
             label="分值">
             <template slot-scope="scope">
-              {{ scope.row.grade }}
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="数据库类型">
-            <template slot-scope="scope">
-              {{ scope.row.database }}
+              {{ scope.row.scope }}
             </template>
           </el-table-column>
            <el-table-column
             label="关键词">
             <template slot-scope="scope">
-              {{ scope.row.keywords }}
+              {{ scope.row.keyWords }}
             </template>
           </el-table-column>
-          <el-table-column label="操作">
+          <el-table-column label="操作" min-width=120px>
             <template slot-scope="scope">
               <el-button
                 size="mini"
                 type="primary"
-                @click="handleLook(scope.$index, scope.row)">查看</el-button>
+                @click="toExperimentDetail(scope.row._id)">查看</el-button>
+              <el-button
+                size="mini"
+                type="danger"
+                @click="deleteExperiment(scope.row._id)">删除</el-button>
               <el-button
                 size="mini"
                 type="warning"
-                @click="handleShare(scope.$index, scope.row)">共享</el-button>
+                @click="shareExperiment(scope.row._id)" v-if="!scope.row.isShare">共享</el-button>
+              <el-button
+                size="mini"
+                type="warning"
+                v-else @click="noShare(scope.row._id)">取消共享</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -218,7 +207,7 @@
 export default {
   data () {
     return {
-      courseInfo: '该课程是XXXXX围绕XXXX主要内容XXXX，帮助学生XXXX',
+      courseInfo: '',
       editCourse: false,
       newExperiment: false,
       editExperiment: false,
@@ -227,76 +216,193 @@ export default {
       formLabelAlign: {
         name: '',
         content: '',
-        data: '',
-        grade: '',
+        scope: '',
         answer: '',
-        keywords: '',
-        database: ''
+        keyWords: ''
       },
-      tableData: [{
-        data: '2016-05-02',
-        content: '内容1',
-        name: '实验1',
-        grade: 10,
-        answer: '答案1',
-        keywords: '关键词1',
-        database: '数据库1'
-      }, {
-        data: '2016-05-04',
-        content: '内容2',
-        name: '实验2',
-        grade: 20,
-        answer: '答案2',
-        keywords: '关键词1',
-        database: '数据库1'
-      }, {
-        data: '2016-05-01',
-        content: '内容3',
-        name: '实验3',
-        grade: 30,
-        answer: '答案3',
-        keywords: '关键词1',
-        database: '数据库1'
-      }, {
-        data: '2016-05-03',
-        content: '内容3',
-        name: '实验4',
-        grade: 40,
-        answer: '答案4',
-        keywords: '关键词1',
-        database: '数据库1'
-      }]
+      tableData: {
+        noPublic: [],
+        public: []
+      },
+      id: '',
+      date: ''
     }
   },
   methods: {
-    handleEdit (index, row) {
-      this.index = index
+    toExperimentDetail (id) {
+      localStorage.setItem('experimentId', id)
+      this.$router.push('/header/experimentDetail')
+    },
+    // 获取课程信息
+    async getCourseInfo () {
+      const res = await this.$axios.get(`teacher/course/getCourseInfo?id=${this.id}`)
+      this.courseInfo = res.data.data.info
+    },
+    // 修改课程信息
+    async editCourseInfo () {
+      const res = await this.$axios.put('teacher/course/updateCourse', {
+        id: this.id,
+        info: this.courseInfo
+      })
+      if (res.data.code === 200) {
+        this.$message({
+          type: 'success',
+          message: '修改成功'
+        })
+        this.editCourse = false
+      }
+    },
+    // 取消修改
+    cancelEdit () {
+      this.editCourse = false
+      this.getCourseInfo()
+    },
+    // 获取实验信息
+    async getExperimentList () {
+      const res = await this.$axios.get(`/teacher/experiment/getExperimentList?courseId=${this.id}`)
+      this.tableData.noPublic = []
+      this.tableData.public = []
+      if (res.data.data.length === 0) {
+        console.log('没有实验')
+      } else {
+        res.data.data.map((item) => {
+          if (item.isPublic === false) {
+            this.tableData.noPublic.push(item)
+          } else {
+            this.tableData.public.push(item)
+          }
+        })
+      }
+      console.log(this.tableData.noPublic)
+      console.log(this.tableData.public)
+    },
+    // 新建实验
+    async addExperiment () {
+      this.formLabelAlign.courseId = this.id
+      this.formLabelAlign.classes = localStorage.getItem('classes')
+      const res = await this.$axios.post('/teacher/experiment/addExperiment', this.formLabelAlign)
+      if (res.data.code === 200) {
+        this.$message({
+          type: 'success',
+          message: '新建成功'
+        })
+        this.newExperiment = false
+        this.getExperimentList()
+      }
+    },
+    edit (id) {
+      this.tableData.noPublic.map((item, index) => {
+        if (item._id === id) {
+          this.index = index
+        }
+      })
       console.log(this.index)
       this.editExperiment = true
-      console.log(index, row)
     },
-    handleDelete (index, row) {
-      confirm('确认删除这个实验吗？') && this.tableData.splice(index, 1)
-      console.log(index, row)
-    },
-    handlePublish (index, row) {
-      this.index = index
-      this.dialogVisible = true
-    },
-    handleShare (index, row) {
-      confirm('确认共享这个实验吗？')
-    },
-    handleLook (index, row) {
-      this.$router.push('/header/experimentDetail')
-      console.log(index, row)
-    },
-    handleClose (done) {
-      this.$confirm('确认关闭？')
-        .then(_ => {
-          done()
+    // 编辑实验
+    async updateExperiment () {
+      const res = await this.$axios.put('/teacher/experiment/updateExperiment', this.tableData.noPublic[this.index])
+      if (res.data.code === 200) {
+        this.$message({
+          type: 'success',
+          message: '修改成功'
         })
-        .catch(_ => {})
+        this.editExperiment = false
+      }
+    },
+    // 删除实验
+    deleteExperiment (id) {
+      this.$confirm('此操作将永久删除该实验, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$axios.delete(`/teacher/experiment/deleteExperiment?id=${id}`)
+        if (res.data.code === 200) {
+          this.$message({
+            type: 'success',
+            message: '删除成功'
+          })
+          this.getExperimentList()
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    // 发布实验
+    async publicExperiment (id, courseId, name, classes) {
+      const res = await this.$axios.put('/teacher/experiment/confirmDeadline', {
+        id: id,
+        courseId,
+        name,
+        classes,
+        deadline: this.date
+      })
+      if (res.data.code === 200) {
+        this.$message({
+          type: 'success',
+          message: '发布成功'
+        })
+        this.dialogVisible = false
+        this.getExperimentList()
+      }
+    },
+    // 共享实验
+    shareExperiment (id) {
+      this.$confirm('此操作将共享该实验, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$axios.put('/teacher/experiment/shareExperiment', {
+          id
+        })
+        if (res.data.code === 200) {
+          this.$message({
+            type: 'success',
+            message: '共享成功'
+          })
+          this.getExperimentList()
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消共享'
+        })
+      })
+    },
+    // 取消共享
+    noShare (id) {
+      this.$confirm('此操作将取消共享该实验, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$axios.put('/teacher/experiment/notShareExperiment', {
+          id
+        })
+        if (res.data.code === 200) {
+          this.$message({
+            type: 'success',
+            message: '共享成功'
+          })
+          this.getExperimentList()
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消共享'
+        })
+      })
     }
+  },
+  created () {
+    this.id = localStorage.getItem('courseId')
+    this.getCourseInfo()
+    this.getExperimentList()
   }
 }
 </script>

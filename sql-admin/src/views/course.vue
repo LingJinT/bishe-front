@@ -12,7 +12,7 @@
         </el-table-column>
         <el-table-column label="授课班级">
           <template slot-scope="scope">
-            <p>{{ scope.row.teachClass }}</p>
+            <p>{{ scope.row.teachClasses }}</p>
           </template>
         </el-table-column>
         <el-table-column label="课程信息">
@@ -44,14 +44,14 @@
                   <el-input v-model="tableData[index].name"></el-input>
                 </el-form-item>
                 <el-form-item label="授课班级">
-                  <el-input v-model="tableData[index].teachClass"></el-input>
+                  <el-input v-model="tableData[index].teachClasses"></el-input>
                 </el-form-item>
                 <el-form-item label="课程信息">
                   <el-input v-model="tableData[index].info"></el-input>
                 </el-form-item>
               </el-form>
               <span slot="footer" class="dialog-footer">
-                <el-button @click="Editdialog = false">取 消</el-button>
+                <el-button @click="cancel">取 消</el-button>
                 <el-button type="primary" @click="updateCourse"
                   >确 定</el-button
                 >
@@ -98,6 +98,11 @@ export default {
         this.Editdialog = false
         this.getCourseList()
       }
+    },
+    // 取消编辑
+    cancel () {
+      this.Editdialog = false
+      this.getCourseList()
     },
     // 删除课程
     async deleteCourse (id) {

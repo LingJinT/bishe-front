@@ -16,19 +16,13 @@
           <el-table-column
             label="分值">
             <template slot-scope="scope">
-              {{ scope.row.grade }}
-            </template>
-          </el-table-column>
-          <el-table-column
-            label="数据库类型">
-            <template slot-scope="scope">
-              {{ scope.row.database }}
+              {{ scope.row.scope }}
             </template>
           </el-table-column>
            <el-table-column
             label="关键词">
             <template slot-scope="scope">
-              {{ scope.row.keywords }}
+              {{ scope.row.keyWords }}
             </template>
           </el-table-column>
           <el-table-column label="操作">
@@ -57,7 +51,27 @@
               <el-button
                 size="mini"
                 type="warning"
-                @click="handleShare(scope.$index, scope.row)">导入</el-button>
+                @click="importExperiment(scope.row._id)">导入</el-button>
+              <el-dialog
+                title="导入实验"
+                :visible.sync="importDialog"
+                width="30%">
+                <el-form ref="form" :model="form" label-width="80px">
+                  <el-form-item label="选择课程">
+                    <el-select v-model="form.courseId" placeholder="请选择要导入的课程">
+                      <el-option
+                        v-for="item in options"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"></el-option>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item>
+                    <el-button type="primary" @click="confirmImport(form.courseId)">确认</el-button>
+                    <el-button @click="dialog = false">取消</el-button>
+                  </el-form-item>
+                </el-form>
+              </el-dialog>
             </template>
           </el-table-column>
         </el-table>
@@ -71,39 +85,14 @@ export default {
     return {
       index: 0,
       dialog: false,
-      tableData: [{
-        data: '2016-05-02',
-        content: '内容1',
-        name: '实验1',
-        grade: 10,
-        answer: '答案1',
-        keywords: '关键词1',
-        database: '数据库1'
-      }, {
-        data: '2016-05-04',
-        content: '内容2',
-        name: '实验2',
-        grade: 20,
-        answer: '答案2',
-        keywords: '关键词1',
-        database: '数据库1'
-      }, {
-        data: '2016-05-01',
-        content: '内容3',
-        name: '实验3',
-        grade: 30,
-        answer: '答案3',
-        keywords: '关键词1',
-        database: '数据库1'
-      }, {
-        data: '2016-05-03',
-        content: '内容3',
-        name: '实验4',
-        grade: 40,
-        answer: '答案4',
-        keywords: '关键词1',
-        database: '数据库1'
-      }]
+      importDialog: false,
+      tableData: [],
+      classes: '',
+      form: {
+        courseId: ''
+      },
+      courseList: [],
+      options: []
     }
   },
   methods: {
@@ -111,9 +100,63 @@ export default {
       this.index = index
       this.dialog = true
     },
-    handleShare () {
-      confirm('确定要导入这个实验吗')
+    // 获取共享实验列表
+    async getExperimentList () {
+      const res = await this.$axios.get('/teacher/experiment/getShareExperimentList')
+      if (res.data.code === 200) {
+        this.tableData = res.data.data
+      }
+    },
+    // 获取课程列表
+    async getCourseList () {
+      const id = localStorage.getItem('teacherId')
+      const res = await this.$axios.get(`/teacher/course/getCourseList?id=${id}`)
+      this.courseList = res.data.data
+      res.data.data.map((item) => {
+        this.options.push({
+          value: item._id,
+          label: item.name
+        })
+      })
+    },
+    // 导入课程
+    importExperiment (id) {
+      console.log(id)
+      this.tableData.map((item, index) => {
+        if (item._id === id) {
+          this.index = index
+        }
+      })
+      this.importDialog = true
+    },
+    async confirmImport (id) {
+      this.courseList.map((item) => {
+        if (item._id === id) {
+          this.classes = item.teachClasses
+        }
+      })
+      const params = {
+        name: this.tableData[this.index].name,
+        content: this.tableData[this.index].content,
+        keyWords: this.tableData[this.index].keyWords,
+        answer: this.tableData[this.index].answer,
+        scope: this.tableData[this.index].scope,
+        courseId: id,
+        classes: this.classes
+      }
+      const res = await this.$axios.post('/teacher/experiment/addExperiment', params)
+      if (res.data.code === 200) {
+        this.$message({
+          type: 'success',
+          message: '导入成功'
+        })
+        this.importDialog = false
+      }
     }
+  },
+  created () {
+    this.getExperimentList()
+    this.getCourseList()
   }
 }
 </script>

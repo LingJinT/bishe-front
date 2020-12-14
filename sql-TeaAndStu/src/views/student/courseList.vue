@@ -19,7 +19,7 @@
           <el-button
             size="mini"
             type="primary"
-            @click="handleEdit(scope.$index, scope.row)"
+            @click="handleEdit(scope.row._id)"
             >进入课程</el-button
           >
         </template>
@@ -32,31 +32,24 @@
 export default {
   data () {
     return {
-      tableData: [
-        {
-          name: 'SQL语言从入门到精通1',
-          info: '简介1'
-        },
-        {
-          name: 'SQL语言从入门到精通2',
-          info: '简介1'
-        },
-        {
-          name: 'SQL语言从入门到精通3',
-          info: '简介1'
-        },
-        {
-          name: 'SQL语言从入门到精通4',
-          info: '简介1'
-        }
-      ]
+      tableData: []
     }
   },
   methods: {
-    handleEdit (index, row) {
+    handleEdit (id) {
+      localStorage.setItem('courseId', id)
       this.$router.push('/Sexperiment')
-      console.log(index, row)
+    },
+    async getCourseList () {
+      const classes = localStorage.getItem('classes')
+      const res = await this.$axios.get(`/student/course/getCourseList?classes=${classes}`)
+      if (res.data.code === 200) {
+        this.tableData = res.data.data
+      }
     }
+  },
+  created () {
+    this.getCourseList()
   }
 }
 </script>

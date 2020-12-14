@@ -7,6 +7,7 @@ import Student from '../views/student.vue'
 import Course from '../views/course.vue'
 import Classes from '../views/classes.vue'
 import Database from '../views/database.vue'
+import Learning from '../views/study.vue'
 Vue.use(VueRouter)
 
 const routes = [
@@ -22,7 +23,8 @@ const routes = [
       { path: '/teacher', component: Teacher },
       { path: '/student', component: Student },
       { path: '/course', component: Course },
-      { path: '/classes', component: Classes }
+      { path: '/classes', component: Classes },
+      { path: '/study', component: Learning }
     ]
   },
   {

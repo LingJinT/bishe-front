@@ -8,16 +8,9 @@
         label="姓名">
       </el-table-column>
       <el-table-column
-        prop="exp1"
-        label="实验一">
-      </el-table-column>
-      <el-table-column
-        prop="exp2"
-        label="实验二">
-      </el-table-column>
-      <el-table-column
-        prop="exp3"
-        label="实验三">
+        :prop="item"
+        :label="item"
+        v-for="(item,index) in tableTitle" :key="index">
       </el-table-column>
     </el-table>
   </el-card>
@@ -27,28 +20,33 @@
 export default {
   data () {
     return {
-      tableData: [{
-        name: '王小虎1',
-        exp1: 99,
-        exp2: 100,
-        exp3: 88
-      }, {
-        name: '王小虎2',
-        exp1: 99,
-        exp2: 100,
-        exp3: 88
-      }, {
-        name: '王小虎3',
-        exp1: 99,
-        exp2: 100,
-        exp3: 88
-      }, {
-        name: '王小虎4',
-        exp1: 99,
-        exp2: 100,
-        exp3: 88
-      }]
+      tableData: [],
+      tableTitle: []
     }
+  },
+  methods: {
+    async getCount () {
+      const id = localStorage.getItem('courseId')
+      const res = await this.$axios(`/teacher/count/getCount?id=${id}`)
+      res.data.data.map((item) => {
+        if (item.experimentInfo.length !== 0) {
+          const obj = {
+            name: item.name
+          }
+          this.tableTitle = []
+          item.experimentInfo.map((todo, index) => {
+            obj[todo.experimentName] = todo.grade
+            this.tableTitle.push(todo.experimentName)
+          })
+          this.tableData.push(obj)
+        }
+      })
+      console.log(this.tableData)
+      console.log(this.tableTitle)
+    }
+  },
+  created () {
+    this.getCount()
   }
 }
 </script>

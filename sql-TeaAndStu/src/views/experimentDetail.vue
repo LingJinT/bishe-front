@@ -1,14 +1,19 @@
 <template>
   <div>
     <el-card class="box-card">
-      <div>实验标题</div>
+      <div class="title">实验标题</div>
+      <div>{{ experimentDetail.name }}</div>
       <el-divider></el-divider>
-      <div>实验内容</div>
+      <div class="title">实验内容</div>
+      <div>{{ experimentDetail.content }}</div>
       <el-divider></el-divider>
-      <div>参考答案</div>
+      <div class="title">参考答案</div>
+      <div>{{ experimentDetail.answer }}</div>
       <el-divider></el-divider>
-      <div>实验统计</div>
-      <div class='main' ref="chart"></div>
+      <div class="charts">
+        <div class='main' ref="chart1"></div>
+        <div class='main' ref="chart2"></div>
+      </div>
     </el-card>
   </div>
 </template>
@@ -17,53 +22,125 @@
 export default {
   data () {
     return {
-      option: {
+      option1: {
         title: {
-          text: 'ECharts 入门示例'
+          text: '完成率',
+          left: 'center'
         },
-        tooltip: {},
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b}: {c} ({d}%)'
+        },
         legend: {
-          data: ['销量']
+          orient: 'vertical',
+          left: 10,
+          data: ['未完成人数', '完成人数']
         },
-        xAxis: {
-          data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
-        },
-        yAxis: {},
         series: [
           {
-            name: '销量',
-            type: 'bar',
-            data: [5, 20, 36, 10, 10, 20]
+            name: '完成情况',
+            type: 'pie',
+            radius: ['40%', '60%'],
+            avoidLabelOverlap: false,
+            label: {
+              show: false,
+              position: 'center'
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: '30',
+                fontWeight: 'bold'
+              }
+            },
+            labelLine: {
+              show: false
+            },
+            data: []
           }
         ]
       },
-      tableData: [{
-        date: '2016-05-02',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1518 弄'
-      }, {
-        date: '2016-05-04',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1517 弄'
-      }, {
-        date: '2016-05-01',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1519 弄'
-      }, {
-        date: '2016-05-03',
-        name: '王小虎',
-        address: '上海市普陀区金沙江路 1516 弄'
-      }]
+      option2: {
+        title: {
+          text: '正确率',
+          left: 'center'
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b} : {c} ({d}%)'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left',
+          data: ['正确人数', '错误人数']
+        },
+        series: [
+          {
+            name: '批改情况',
+            type: 'pie',
+            radius: '55%',
+            center: ['50%', '60%'],
+            data: [],
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            }
+          }
+        ]
+      },
+      id: '',
+      experimentDetail: {}
     }
   },
-  mounted () {
-    this.initEcharts()
-  },
+  mounted () {},
   methods: {
     initEcharts () {
-      const myChart = this.$echarts.init(this.$refs.chart)
-      myChart.setOption(this.option)
+      const myChart1 = this.$echarts.init(this.$refs.chart1)
+      myChart1.setOption(this.option1)
+      const myChart2 = this.$echarts.init(this.$refs.chart2)
+      myChart2.setOption(this.option2)
+    },
+    // 获取实验信息
+    async getExperimentDetail () {
+      const res = await this.$axios.get(`/teacher/experiment/getExperimentDetail?id=${this.id}`)
+      if (res.data.code === 200) {
+        this.experimentDetail = res.data.data
+      }
+    },
+    // 实验统计
+    async getgradeDetail () {
+      const res = await this.$axios.get(`/teacher/experimentDetail/experimentDetail?id=${this.id}`)
+      if (res.data.code === 200) {
+        this.option1.series[0].data.push({
+          value: res.data.data.finishedCount,
+          name: '完成人数'
+        })
+        const notFinished = res.data.data.totalCount - res.data.data.finishedCount
+        this.option1.series[0].data.push({
+          value: notFinished,
+          name: '未完成人数'
+        })
+        this.option2.series[0].data.push({
+          value: res.data.data.correctCount,
+          name: '正确人数'
+        })
+        const errCount = res.data.data.finishedCount - res.data.data.correctCount
+        this.option2.series[0].data.push({
+          value: errCount,
+          name: '错误人数'
+        })
+      }
     }
+  },
+  created () {
+    this.id = localStorage.getItem('experimentId')
+    this.getExperimentDetail()
+    this.getgradeDetail().then(() => {
+      this.initEcharts()
+    })
   }
 }
 </script>
@@ -73,4 +150,11 @@ export default {
   width: 500px;
   height: 500px;
 }
+.title {
+  margin-bottom: 10px
+}
+/* .charts {
+  display: flex;
+  justify-content: space-around;
+} */
 </style>

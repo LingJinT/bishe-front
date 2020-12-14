@@ -12,22 +12,19 @@
             <el-input v-model="form.name"></el-input>
           </el-form-item>
           <el-form-item label="选择班级">
-            <el-select v-model="form.classes" placeholder="请选择授课班级">
-              <el-option label="班级一" value="shanghai"></el-option>
-              <el-option label="班级二" value="beijing"></el-option>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="选择学生">
-            <el-select v-model="form.classes" placeholder="请选择重修学生" filterable>
-              <el-option label="学生一" value="shanghai"></el-option>
-              <el-option label="学生二" value="beijing"></el-option>
+            <el-select v-model="form.teachClasses" placeholder="请选择授课班级">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value"></el-option>
             </el-select>
           </el-form-item>
           <el-form-item label="课程信息">
-            <el-input type="textarea" v-model="form.classesInfo"></el-input>
+            <el-input type="textarea" v-model="form.info"></el-input>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" @click="dialog = false">确认</el-button>
+            <el-button type="primary" @click="addCourse">确认</el-button>
             <el-button @click="dialog = false">取消</el-button>
           </el-form-item>
         </el-form>
@@ -39,14 +36,13 @@
       <el-table-column
         label="课程名称">
         <template slot-scope="scope">
-          <i class="el-icon-time"></i>
           <span style="margin-left: 10px">{{ scope.row.name }}</span>
         </template>
       </el-table-column>
       <el-table-column
         label="授课班级">
         <template slot-scope="scope">
-            <p>{{ scope.row.classes }}</p>
+            <p>{{ scope.row.teachClasses }}</p>
         </template>
       </el-table-column>
       <el-table-column label="操作">
@@ -54,15 +50,15 @@
           <el-button
             size="mini"
             type="success"
-            @click="handleEdit(scope.$index, scope.row)">进入课程</el-button>
+            @click="toCourseDetail(scope.row._id, scope.row.teachClasses)">进入课程</el-button>
           <el-button
             size="mini"
             type="danger"
-            @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+            @click="deleteCourse(scope.row._id)">删除</el-button>
           <el-button
             size="mini"
             type="primary"
-            @click="toCount(scope.$index, scope.row)">统计</el-button>
+            @click="toCount(scope.row._id, scope.row.teachClasses)">统计</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -74,46 +70,85 @@ export default {
   data () {
     return {
       dialog: false,
-      tableData: [{
-        classes: '20170821',
-        name: 'SQL语言从入门到精通1'
-      }, {
-        classes: '20170821',
-        name: 'SQL语言从入门到精通2'
-      }, {
-        classes: '20170821',
-        name: 'SQL语言从入门到精通3'
-      }, {
-        classes: '20170821',
-        name: 'SQL语言从入门到精通4'
-      }],
+      tableData: [],
       form: {
         name: '',
-        classes: '',
-        classesInfo: ''
-      }
+        teachClasses: '',
+        info: '',
+        teacherId: ''
+      },
+      options: []
     }
   },
   methods: {
-    handleEdit (index, row) {
+    toCourseDetail (id, classes) {
+      localStorage.setItem('courseId', id)
+      localStorage.setItem('classes', classes)
       this.$router.push('/header/courseDetail')
-      console.log(index, row)
     },
-    handleDelete (index, row) {
-      confirm('确认删除这门课程吗？') && this.tableData.splice(index, 1)
-      console.log(index, row)
-    },
-    toCount (index, row) {
+    toCount (id, classes) {
+      localStorage.setItem('classes', classes)
+      localStorage.setItem('courseId', id)
       this.$router.push('/count')
     },
+    // 获取课程列表
     async getCourseList () {
       // const token = localStorage.getItem('token')
-      const res = await this.$axios.get('/courselist/')
-      console.log(res.data)
+      // console.log(this.$store.state.teacherId)
+      const id = localStorage.getItem('teacherId')
+      const res = await this.$axios.get(`/teacher/course/getCourseList?id=${id}`)
+      this.tableData = res.data.data
+    },
+    // 获取班级列表
+    async getClassesList () {
+      const res = await this.$axios.get('/admin/classes/getClassesList')
+      res.data.data.map((item) => {
+        this.options.push({
+          value: item,
+          label: item
+        })
+      })
+    },
+    // 新建课程
+    async addCourse () {
+      const id = localStorage.getItem('teacherId')
+      this.form.teacherId = id
+      const res = await this.$axios.post('/teacher/course/addCourse', this.form)
+      if (res.data.code === 200) {
+        this.$message({
+          type: 'success',
+          message: '新建成功!'
+        })
+        this.dialog = false
+        this.getCourseList()
+      }
+    },
+    // 删除课程
+    deleteCourse (id) {
+      this.$confirm('此操作将永久删除该课程, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const res = await this.$axios.delete(`/teacher/course/deleteCourse?id=${id}`)
+        if (res.data.code === 200) {
+          this.$message({
+            type: 'success',
+            message: '删除成功'
+          })
+          this.getCourseList()
+        }
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     }
   },
   created () {
     this.getCourseList()
+    this.getClassesList()
   }
 }
 </script>

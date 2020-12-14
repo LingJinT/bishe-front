@@ -29,6 +29,7 @@ const routes = [
   {
     path: '/header',
     component: Header,
+    redirect: '/header/courseList',
     children: [
       {
         path: '/header/courseList',

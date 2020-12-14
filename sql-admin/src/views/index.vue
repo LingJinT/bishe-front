@@ -31,6 +31,10 @@
                 <i class="el-icon-document"></i>
                 <span slot="title">班级管理</span>
               </el-menu-item>
+              <el-menu-item index="/study">
+                <i class="el-icon-document"></i>
+                <span slot="title">学习资料管理</span>
+              </el-menu-item>
             </el-menu>
           </el-col>
         </el-row>
@@ -46,16 +50,6 @@ export default {
   methods: {
     logout () {
       this.$router.push('/')
-    },
-    toTeacher () {
-      this.$router.push('/teacher')
-    },
-    toStudent () {
-      this.$router.push('/student')
-    },
-    toCourse () {
-      console.log('点击了toCourse')
-      this.$router.push('/course')
     }
   }
 }

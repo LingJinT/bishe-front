@@ -81,7 +81,7 @@
                 </el-form-item>
               </el-form>
               <span slot="footer" class="dialog-footer">
-                <el-button @click="Editdialog = false">取 消</el-button>
+                <el-button @click="cancel">取 消</el-button>
                 <el-button type="primary" @click="confirmUpdateStudent">确 定</el-button>
               </span>
             </el-dialog>
@@ -146,6 +146,11 @@ export default {
           message: '修改成功'
         })
       }
+    },
+    // 取消编辑
+    cancel () {
+      this.Editdialog = false
+      this.getStudentsList()
     },
     // 重置密码
     async resetPassword (id) {

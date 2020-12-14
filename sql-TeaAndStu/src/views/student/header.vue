@@ -19,10 +19,6 @@
                   <i class="el-icon-location"></i>
                   <span slot="title">课程列表</span>
               </el-menu-item>
-              <el-menu-item index="/Sdiscuss">
-                <i class="el-icon-document"></i>
-                <span slot="title">讨论区</span>
-              </el-menu-item>
               <el-menu-item index="/Slearning">
                 <i class="el-icon-document"></i>
                 <span slot="title">学习资料</span>

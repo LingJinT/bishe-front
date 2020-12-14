@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <Learning></Learning>
+    <Learning ref="child"></Learning>
     <div class="learningBox" @click="dialog = true">
       <div class="img"></div>
     </div>
@@ -10,29 +10,18 @@
       width="50%">
       <el-form>
         <el-form-item label="资料名">
-          <el-input type="text" v-model="form.name"></el-input>
-        </el-form-item>
-        <el-form-item label="关键字">
-          <el-input type="text" v-model="form.keywords"></el-input>
+          <el-input type="text" v-model="uploadForm.name"></el-input>
         </el-form-item>
         <el-form-item label="链接">
-          <el-input type="text" v-model="form.link"></el-input>
+          <el-input type="text" v-model="uploadForm.linkUrl" placeholder="以http或者https开头"></el-input>
         </el-form-item>
         <el-form-item label="图片">
-          <el-upload
-            class="upload-demo"
-            drag
-            action="https://jsonplaceholder.typicode.com/posts/"
-            multiple>
-            <i class="el-icon-upload"></i>
-            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-            <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过500kb</div>
-          </el-upload>
+          <input type="file" ref="file" />
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialog = false">取 消</el-button>
-        <el-button type="primary" @click="dialog = false">确 定</el-button>
+        <el-button type="primary" @click="handle">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -47,10 +36,32 @@ export default {
   data () {
     return {
       dialog: false,
-      form: {
+      uploadForm: {
         name: '',
-        keywords: '',
-        link: ''
+        linkUrl: ''
+      },
+      learning: {}
+    }
+  },
+  methods: {
+    // 上传资料
+    async handle () {
+      const formdata = new FormData()
+      formdata.append('file', this.$refs.file.files[0])
+      formdata.append('linkUrl', this.uploadForm.linkUrl)
+      formdata.append('name', this.uploadForm.name)
+      const res = await this.$axios.post('/teacher/learning/uploadLearning', formdata, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      if (res.data.code === 200) {
+        this.dialog = false
+        this.$message({
+          type: 'success',
+          message: '上传成功'
+        })
+        this.$refs.child.getLearningList()
       }
     }
   }

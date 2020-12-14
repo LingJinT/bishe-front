@@ -13,7 +13,7 @@
           <el-input v-model="loginForm.username"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="loginForm.password" type="password" @keyup.enter.native="login('loginForm')"></el-input>
+          <el-input v-model="loginForm.password" show-password @keyup.enter.native="login('loginForm')"></el-input>
         </el-form-item>
         <el-form-item>
           <div class="error" v-show="isError">用户名密码错误</div>
