@@ -39,6 +39,16 @@
               <el-form-item label="实验内容">
                 <el-input v-model="formLabelAlign.content" type="textarea"></el-input>
               </el-form-item>
+              <el-form-item label="数据库">
+                <el-select v-model="formLabelAlign.type" placeholder="请选择数据库类型">
+                  <el-option
+                    v-for="item in options"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
+              </el-form-item>
               <el-form-item label="分值">
                 <el-input v-model="formLabelAlign.scope"></el-input>
               </el-form-item>
@@ -65,6 +75,12 @@
             </template>
           </el-table-column>
           <el-table-column
+            label="数据库">
+            <template slot-scope="scope">
+              {{ scope.row.type }}
+            </template>
+          </el-table-column>
+          <el-table-column
             label="分值">
             <template slot-scope="scope">
               {{ scope.row.scope }}
@@ -81,31 +97,41 @@
               <el-button
                 size="mini"
                 type="success"
-                @click="edit(scope.row._id)"
+                @click="edit(scope.row)"
                 style="margin-right: 10px">编辑</el-button>
               <el-dialog
                 title="编辑实验"
                 :visible.sync="editExperiment"
                 width="30%">
-                <el-form label-position="left" label-width="80px" :model="tableData.noPublic[index]">
+                <el-form label-position="left" label-width="80px" :model="edExperiment">
                   <el-form-item label="实验名称">
-                    <el-input v-model="tableData.noPublic[index].name"></el-input>
+                    <el-input v-model="edExperiment.name"></el-input>
                   </el-form-item>
                   <el-form-item label="实验内容">
-                    <el-input v-model="tableData.noPublic[index].content" type="textarea"></el-input>
+                    <el-input v-model="edExperiment.content" type="textarea"></el-input>
+                  </el-form-item>
+                  <el-form-item label="数据库">
+                    <el-select v-model="edExperiment.type" placeholder="请选择数据库类型">
+                      <el-option
+                        v-for="item in options"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value">
+                      </el-option>
+                    </el-select>
                   </el-form-item>
                   <el-form-item label="分值">
-                    <el-input v-model="tableData.noPublic[index].scope"></el-input>
+                    <el-input v-model="edExperiment.scope"></el-input>
                   </el-form-item>
                   <el-form-item label="答案">
-                    <el-input v-model="tableData.noPublic[index].answer"></el-input>
+                    <el-input v-model="edExperiment.answer"></el-input>
                   </el-form-item>
                   <el-form-item label="关键词">
-                    <el-input v-model="tableData.noPublic[index].keyWords"></el-input>
+                    <el-input v-model="edExperiment.keyWords"></el-input>
                   </el-form-item>
                 </el-form>
                 <span slot="footer" class="dialog-footer">
-                  <el-button @click="editExperiment = false">取 消</el-button>
+                  <el-button @click="cancel">取 消</el-button>
                   <el-button type="primary" @click="updateExperiment(tableData.noPublic[index]._id)">确 定</el-button>
                 </span>
               </el-dialog>
@@ -172,7 +198,7 @@
               {{ scope.row.scope }}
             </template>
           </el-table-column>
-           <el-table-column
+          <el-table-column
             label="关键词">
             <template slot-scope="scope">
               {{ scope.row.keyWords }}
@@ -212,7 +238,6 @@ export default {
       newExperiment: false,
       editExperiment: false,
       dialogVisible: false,
-      index: 0,
       formLabelAlign: {
         name: '',
         content: '',
@@ -224,8 +249,19 @@ export default {
         noPublic: [],
         public: []
       },
+      edExperiment: {},
       id: '',
-      date: ''
+      date: '',
+      options: [
+        {
+          value: 'mysql',
+          label: 'mysql'
+        },
+        {
+          value: 'mongo',
+          label: 'mongo'
+        }
+      ]
     }
   },
   methods: {
@@ -273,8 +309,6 @@ export default {
           }
         })
       }
-      console.log(this.tableData.noPublic)
-      console.log(this.tableData.public)
     },
     // 新建实验
     async addExperiment () {
@@ -290,18 +324,14 @@ export default {
         this.getExperimentList()
       }
     },
-    edit (id) {
-      this.tableData.noPublic.map((item, index) => {
-        if (item._id === id) {
-          this.index = index
-        }
-      })
-      console.log(this.index)
+    edit (info) {
+      this.edExperiment = info
+      console.log(this.edExperiment)
       this.editExperiment = true
     },
     // 编辑实验
     async updateExperiment () {
-      const res = await this.$axios.put('/teacher/experiment/updateExperiment', this.tableData.noPublic[this.index])
+      const res = await this.$axios.put('/teacher/experiment/updateExperiment', this.edExperiment)
       if (res.data.code === 200) {
         this.$message({
           type: 'success',
@@ -309,6 +339,11 @@ export default {
         })
         this.editExperiment = false
       }
+    },
+    // 取消编辑
+    cancel () {
+      this.editExperiment = false
+      this.getExperimentList()
     },
     // 删除实验
     deleteExperiment (id) {
@@ -387,14 +422,14 @@ export default {
         if (res.data.code === 200) {
           this.$message({
             type: 'success',
-            message: '共享成功'
+            message: '取消共享成功'
           })
           this.getExperimentList()
         }
       }).catch(() => {
         this.$message({
           type: 'info',
-          message: '已取消共享'
+          message: '已取消'
         })
       })
     }

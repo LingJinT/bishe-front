@@ -1,7 +1,7 @@
 <template>
   <el-container>
     <el-header>
-      <span>SQL实验管理系统——教师端</span>
+      <span class="img"><img src="../../public/SQL.png" alt="">SQL实验管理系统——教师端</span>
       <span @click="logout" class="logout">logout</span>
     </el-header>
     <el-container>
@@ -16,7 +16,7 @@
               active-text-color="#ffd04b"
               router>
               <el-menu-item index="/header/courseList">
-                  <i class="el-icon-location"></i>
+                  <i class="el-icon-document"></i>
                   <span slot="title">课程列表</span>
               </el-menu-item>
               <el-menu-item index="/header/experimentList">
@@ -65,7 +65,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .el-container {
   height: 100%;
 }
@@ -82,5 +82,13 @@ export default {
 }
 .logout {
   cursor: pointer;
+}
+.img {
+  display: flex;
+  align-items: center;
+  img {
+    width: 30px;
+    height: 30px;
+  }
 }
 </style>

@@ -14,6 +14,12 @@
             </template>
           </el-table-column>
           <el-table-column
+            label="数据库">
+            <template slot-scope="scope">
+              {{ scope.row.type }}
+            </template>
+          </el-table-column>
+          <el-table-column
             label="分值">
             <template slot-scope="scope">
               {{ scope.row.scope }}
@@ -30,17 +36,17 @@
               <el-button
                 size="mini"
                 type="primary"
-                @click="handleLook(scope.$index, scope.row)"
+                @click="handleLook(scope.row)"
                 style="margin-right: 20px">查看</el-button>
               <el-dialog
                 :visible.sync="dialog"
                 width="30%">
-                <el-form label-position="left" label-width="80px" :model="tableData[index]" disabled>
+                <el-form label-position="left" label-width="80px" :model="editExperiment" disabled>
                   <el-form-item label="实验内容">
-                    <el-input v-model="tableData[index].content" type="textarea"></el-input>
+                    <el-input v-model="editExperiment.content" type="textarea"></el-input>
                   </el-form-item>
                   <el-form-item label="答案">
-                    <el-input v-model="tableData[index].answer" type="textarea"></el-input>
+                    <el-input v-model="editExperiment.answer" type="textarea"></el-input>
                   </el-form-item>
                 </el-form>
                 <span slot="footer" class="dialog-footer">
@@ -51,7 +57,7 @@
               <el-button
                 size="mini"
                 type="warning"
-                @click="importExperiment(scope.row._id)">导入</el-button>
+                @click="importExperiment(scope.row)">导入</el-button>
               <el-dialog
                 title="导入实验"
                 :visible.sync="importDialog"
@@ -68,7 +74,7 @@
                   </el-form-item>
                   <el-form-item>
                     <el-button type="primary" @click="confirmImport(form.courseId)">确认</el-button>
-                    <el-button @click="dialog = false">取消</el-button>
+                    <el-button @click="importDialog = false">取消</el-button>
                   </el-form-item>
                 </el-form>
               </el-dialog>
@@ -83,7 +89,6 @@
 export default {
   data () {
     return {
-      index: 0,
       dialog: false,
       importDialog: false,
       tableData: [],
@@ -92,12 +97,13 @@ export default {
         courseId: ''
       },
       courseList: [],
-      options: []
+      options: [],
+      editExperiment: {}
     }
   },
   methods: {
-    handleLook (index) {
-      this.index = index
+    handleLook (info) {
+      this.editExperiment = info
       this.dialog = true
     },
     // 获取共享实验列表
@@ -120,13 +126,8 @@ export default {
       })
     },
     // 导入课程
-    importExperiment (id) {
-      console.log(id)
-      this.tableData.map((item, index) => {
-        if (item._id === id) {
-          this.index = index
-        }
-      })
+    importExperiment (info) {
+      this.editExperiment = info
       this.importDialog = true
     },
     async confirmImport (id) {
@@ -136,11 +137,11 @@ export default {
         }
       })
       const params = {
-        name: this.tableData[this.index].name,
-        content: this.tableData[this.index].content,
-        keyWords: this.tableData[this.index].keyWords,
-        answer: this.tableData[this.index].answer,
-        scope: this.tableData[this.index].scope,
+        name: this.editExperiment.name,
+        content: this.editExperiment.content,
+        keyWords: this.editExperiment.keyWords,
+        answer: this.editExperiment.answer,
+        scope: this.editExperiment.scope,
         courseId: id,
         classes: this.classes
       }

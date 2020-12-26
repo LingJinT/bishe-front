@@ -27,36 +27,25 @@
       </div>
       <el-table
         :data="tableData"
-        style="width: 100%"
-        :default-sort = "{prop: 'userId', order: 'descending'}">
+        style="width: 100%">
         <el-table-column
-          label="名称">
-          <template slot-scope="scope">
-            <p>{{ scope.row.name }}</p>
-          </template>
+          label="名称"
+          prop="name">
         </el-table-column>
         <el-table-column
           label="学号"
-          sortable
           prop="userId">
-          <template slot-scope="scope">
-              <p>{{ scope.row.userId }}</p>
-          </template>
         </el-table-column>
         <el-table-column
           label="班级"
-          sortable
           prop="classes">
-          <template slot-scope="scope">
-              <p>{{ scope.row.classes }}</p>
-          </template>
         </el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button
             size="mini"
             type="primary"
-            @click="updateStudent(scope.row.userId)">编辑</el-button>
+            @click="updateStudent(scope.row)">编辑</el-button>
             <el-button
             size="mini"
             type="warning"
@@ -69,15 +58,15 @@
               title="编辑学生"
               :visible.sync="Editdialog"
               width="30%">
-              <el-form label-position="left" label-width="80px" :model="tableData[index]">
+              <el-form label-position="left" label-width="80px" :model="editStudent">
                 <el-form-item label="名称">
-                  <el-input v-model="tableData[index].name"></el-input>
+                  <el-input v-model="editStudent.name"></el-input>
                 </el-form-item>
                 <el-form-item label="学号">
-                  <el-input v-model="tableData[index].userId"></el-input>
+                  <el-input v-model="editStudent.userId" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="班级">
-                  <el-input v-model="tableData[index].classes"></el-input>
+                  <el-input v-model="editStudent.classes" disabled></el-input>
                 </el-form-item>
               </el-form>
               <span slot="footer" class="dialog-footer">
@@ -98,12 +87,12 @@ export default {
     return {
       dialog: false,
       Editdialog: false,
-      index: 0,
       newStudent: {
         name: '',
         id: '',
         classes: ''
       },
+      editStudent: {},
       tableData: []
     }
   },
@@ -112,6 +101,7 @@ export default {
     async getStudentsList () {
       const res = await this.$axios.get('/admin/student/getStudentsList')
       if (res.data.code === 200) {
+        console.log(res.data)
         this.tableData = res.data.data
       }
     },
@@ -129,22 +119,19 @@ export default {
       }
     },
     // 更新学生
-    updateStudent (id) {
-      this.tableData.map((item, index) => {
-        if (item.userId === id) {
-          this.index = index
-        }
-      })
+    updateStudent (info) {
+      this.editStudent = info
       this.Editdialog = true
     },
     async confirmUpdateStudent () {
-      const res = await this.$axios.put('/admin/student/updateStudent', this.tableData[this.index])
+      const res = await this.$axios.put('/admin/student/updateStudent', this.editStudent)
       if (res.data.code === 200) {
         this.Editdialog = false
         this.$message({
           type: 'success',
           message: '修改成功'
         })
+        this.getStudentsList()
       }
     },
     // 取消编辑
@@ -176,7 +163,7 @@ export default {
       })
     },
     // 删除学生
-    async deleteStudent (id) {
+    deleteStudent (id) {
       this.$confirm('此操作将永久删除该学生, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -184,11 +171,11 @@ export default {
       }).then(async () => {
         const res = await this.$axios.delete(`/admin/student/deleteStudent?id=${id}`)
         if (res.data.code === 200) {
+          this.getStudentsList()
           this.$message({
             type: 'success',
             message: '删除成功'
           })
-          this.getStudentsList()
         }
       }).catch(() => {
         this.$message({

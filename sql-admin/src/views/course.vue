@@ -25,7 +25,7 @@
             <el-button
               size="mini"
               type="primary"
-              @click="dialogTrue(scope.$index)"
+              @click="dialogTrue(scope.row)"
               >编辑</el-button
             >
             <el-button
@@ -38,16 +38,16 @@
               <el-form
                 label-position="left"
                 label-width="80px"
-                :model="tableData[index]"
+                :model="editCourse"
               >
                 <el-form-item label="课程名称">
-                  <el-input v-model="tableData[index].name"></el-input>
+                  <el-input v-model="editCourse.name"></el-input>
                 </el-form-item>
                 <el-form-item label="授课班级">
-                  <el-input v-model="tableData[index].teachClasses"></el-input>
+                  <el-input v-model="editCourse.teachClasses" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="课程信息">
-                  <el-input v-model="tableData[index].info"></el-input>
+                  <el-input v-model="editCourse.info"></el-input>
                 </el-form-item>
               </el-form>
               <span slot="footer" class="dialog-footer">
@@ -69,8 +69,8 @@ export default {
   data () {
     return {
       Editdialog: false,
-      index: 0,
-      tableData: []
+      tableData: [],
+      editCourse: {}
     }
   },
   methods: {
@@ -83,13 +83,13 @@ export default {
       }
     },
     // 弹出对话框
-    dialogTrue (index) {
-      this.index = index
+    dialogTrue (info) {
+      this.editCourse = info
       this.Editdialog = true
     },
     // 编辑课程
     async updateCourse () {
-      const res = await this.$axios.put('/admin/course/updateCourse', this.tableData[this.index])
+      const res = await this.$axios.put('/admin/course/updateCourse', this.editCourse)
       if (res.data.code === 200) {
         this.$message({
           type: 'success',

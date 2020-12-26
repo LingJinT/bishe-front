@@ -5,6 +5,7 @@
         <div>
           <h3 style="text-align: center">{{ ExperimentInfo.name }}</h3>
           <p class="keyWords">关键字: <span>{{ ExperimentInfo.keyWords }}</span></p>
+          <p class="keyWords">数据库类型: <span>{{ ExperimentInfo.type }}</span></p>
           <p class="main">实验内容:</p>
           <p class="content">{{ ExperimentInfo.content }}</p>
         </div>
@@ -58,7 +59,8 @@ export default {
     async compile () {
       try {
         const res = await this.$axios.post('student/exam/compile', {
-          code: this.textarea
+          code: this.textarea,
+          type: this.ExperimentInfo.type
         })
         console.log(res)
         this.result = res.data.data

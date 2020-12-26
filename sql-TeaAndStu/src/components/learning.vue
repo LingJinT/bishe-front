@@ -36,6 +36,7 @@ export default {
 <style lang="scss" scoped>
 .container {
   display: flex;
+  flex-wrap: wrap;
 }
 .learningBox {
   margin-left: 20px;

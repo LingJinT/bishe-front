@@ -54,7 +54,7 @@
             <el-button
             size="mini"
             type="primary"
-            @click="updateTeacher(scope.row.userId)">编辑</el-button>
+            @click="updateTeacher(scope.row)">编辑</el-button>
             <el-button
             size="mini"
             type="warning"
@@ -67,12 +67,12 @@
               title="编辑教师"
               :visible.sync="Editdialog"
               width="30%">
-              <el-form label-position="left" label-width="80px" :model="tableData[index]">
+              <el-form label-position="left" label-width="80px" :model="editTeacher">
                 <el-form-item label="姓名">
-                  <el-input v-model="tableData[index].name"></el-input>
+                  <el-input v-model="editTeacher.name"></el-input>
                 </el-form-item>
                 <el-form-item label="工号">
-                  <el-input v-model="tableData[index].userId"></el-input>
+                  <el-input v-model="editTeacher.userId" disabled></el-input>
                 </el-form-item>
               </el-form>
               <span slot="footer" class="dialog-footer">
@@ -98,6 +98,7 @@ export default {
         name: '',
         id: ''
       },
+      editTeacher: {},
       tableData: []
     }
   },
@@ -116,16 +117,12 @@ export default {
       }
     },
     // 更新教师
-    updateTeacher (id) {
-      this.tableData.map((item, index) => {
-        if (item.userId === id) {
-          this.index = index
-        }
-      })
+    updateTeacher (info) {
+      this.editTeacher = info
       this.Editdialog = true
     },
     async confirmUpdateTeacher () {
-      const res = await this.$axios.put('/admin/teacher/updateTeacher', this.tableData[this.index])
+      const res = await this.$axios.put('/admin/teacher/updateTeacher', this.editTeacher)
       if (res.data.code === 200) {
         this.Editdialog = false
         this.$message({

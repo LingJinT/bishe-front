@@ -3,7 +3,6 @@ import VueRouter from 'vue-router'
 import Login from '../views/login.vue'
 import Header from '../views/header.vue'
 import CourseList from '../views/courseList.vue'
-import AddCourse from '../views/addCourse.vue'
 import SelfInfo from '../views/selfInfo.vue'
 import CourseDetail from '../views/courseDetail.vue'
 import ExperimentDetail from '../views/experimentDetail.vue'
@@ -42,10 +41,6 @@ const routes = [
       {
         path: '/header/courseDetail',
         component: CourseDetail
-      },
-      {
-        path: '/header/addCourse',
-        component: AddCourse
       },
       {
         path: '/header/selfInfo',

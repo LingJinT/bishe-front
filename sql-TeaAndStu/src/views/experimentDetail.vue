@@ -7,6 +7,9 @@
       <div class="title">实验内容</div>
       <div>{{ experimentDetail.content }}</div>
       <el-divider></el-divider>
+      <div class="title">数据库类型</div>
+      <div>{{ experimentDetail.type }}</div>
+      <el-divider></el-divider>
       <div class="title">参考答案</div>
       <div>{{ experimentDetail.answer }}</div>
       <el-divider></el-divider>

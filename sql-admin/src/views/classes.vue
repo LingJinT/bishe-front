@@ -33,7 +33,6 @@ export default {
       classesId: '',
       select: '',
       Editdialog: false,
-      index: 0,
       tableData: []
     }
   },

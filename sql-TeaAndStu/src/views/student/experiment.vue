@@ -29,6 +29,12 @@
             </template>
           </el-table-column>
           <el-table-column
+            label="数据库">
+            <template slot-scope="scope">
+              {{ scope.row.type }}
+            </template>
+          </el-table-column>
+          <el-table-column
             label="分值">
             <template slot-scope="scope">
               {{ scope.row.scope }}
@@ -65,6 +71,12 @@
             </template>
           </el-table-column>
           <el-table-column
+            label="数据库">
+            <template slot-scope="scope">
+              {{ scope.row.type }}
+            </template>
+          </el-table-column>
+          <el-table-column
             label="分值">
             <template slot-scope="scope">
               {{ scope.row.scope }}
@@ -88,7 +100,6 @@ export default {
   data () {
     return {
       courseInfo: '',
-      index: 0,
       tableData: [],
       finished: [],
       notFinished: [],
@@ -119,7 +130,8 @@ export default {
           isFinished: item.isFinished,
           deadline: item.experimentInfo[0].deadline,
           name: item.experimentInfo[0].name,
-          scope: item.experimentInfo[0].scope
+          scope: item.experimentInfo[0].scope,
+          type: item.experimentInfo[0].type
         }
       })
       this.tableData.map((item) => {

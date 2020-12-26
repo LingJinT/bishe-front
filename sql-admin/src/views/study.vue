@@ -26,7 +26,7 @@
           <el-button
             size="mini"
             type="primary"
-            @click="updateLearning(scope.$index, scope.row._id)">编辑</el-button>
+            @click="updateLearning(scope.row)">编辑</el-button>
           <el-button
             size="mini"
             type="danger"
@@ -35,16 +35,16 @@
             <el-form
               label-position="left"
               label-width="80px"
-              :model="tableData[index]"
+              :model="editStudy"
             >
               <el-form-item label="资料名称">
-                <el-input v-model="tableData[index].name"></el-input>
+                <el-input v-model="editStudy.name"></el-input>
               </el-form-item>
               <el-form-item label="资料链接">
-                <el-input v-model="tableData[index].linkUrl"></el-input>
+                <el-input v-model="editStudy.linkUrl"></el-input>
               </el-form-item>
               <el-form-item label="图片链接">
-                <el-input v-model="tableData[index].imgUrl"></el-input>
+                <el-input v-model="editStudy.imgUrl" disabled></el-input>
               </el-form-item>
             </el-form>
             <span slot="footer" class="dialog-footer">
@@ -66,7 +66,7 @@ export default {
     return {
       tableData: [],
       dialog: false,
-      index: 0
+      editStudy: {}
     }
   },
   methods: {
@@ -78,12 +78,12 @@ export default {
       }
     },
     // 修改资料
-    updateLearning (index, id) {
-      this.index = index
+    updateLearning (info) {
+      this.editStudy = info
       this.dialog = true
     },
     async confirm () {
-      const res = await this.$axios.put('/teacher/learning/updateLearning', this.tableData[this.index])
+      const res = await this.$axios.put('/teacher/learning/updateLearning', this.editStudy)
       if (res.data.code === 200) {
         this.dialog = false
         this.$message({
@@ -93,7 +93,7 @@ export default {
       }
     },
     cancel () {
-      this.Editdialog = false
+      this.dialog = false
       this.getLearningList()
     },
     // 删除资料

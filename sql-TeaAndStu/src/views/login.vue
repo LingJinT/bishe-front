@@ -132,7 +132,7 @@ export default {
     async login () {
       this.$refs.loginform.validate(async (valid) => {
         if (valid) {
-          if (this.form.resource === 'teacher') {
+          if (this.form.resource === '教师登录') {
             const res = await this.$axios.post('/teacher/login', this.form)
             localStorage.setItem('token', res.data.token)
             localStorage.setItem('teacherId', this.form.username)
