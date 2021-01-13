@@ -63,9 +63,6 @@ export default {
         }
       })
     }
-  },
-  created () {
-    console.log(new Date().toLocaleDateString('id', { year: 'numeric', month: 'long', day: 'numeric' }))
   }
 }
 </script>

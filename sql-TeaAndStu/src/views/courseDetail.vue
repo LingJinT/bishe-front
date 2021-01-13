@@ -132,7 +132,7 @@
                 </el-form>
                 <span slot="footer" class="dialog-footer">
                   <el-button @click="cancel">取 消</el-button>
-                  <el-button type="primary" @click="updateExperiment(tableData.noPublic[index]._id)">确 定</el-button>
+                  <el-button type="primary" @click="updateExperiment()">确 定</el-button>
                 </span>
               </el-dialog>
               <el-button

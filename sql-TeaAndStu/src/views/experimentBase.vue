@@ -143,6 +143,7 @@ export default {
         answer: this.editExperiment.answer,
         scope: this.editExperiment.scope,
         courseId: id,
+        type: this.editExperiment.type,
         classes: this.classes
       }
       const res = await this.$axios.post('/teacher/experiment/addExperiment', params)

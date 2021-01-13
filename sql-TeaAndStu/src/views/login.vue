@@ -144,12 +144,13 @@ export default {
             }
           } else {
             const res = await this.$axios.post('/student/login', this.form)
-            localStorage.setItem('token', res.data.token)
-            localStorage.setItem('classes', res.data.data.classes)
-            localStorage.setItem('studentId', res.data.data.userId)
             if (res.data.code === 200) {
+              localStorage.setItem('token', res.data.token)
+              localStorage.setItem('classes', res.data.data[0].classes)
+              localStorage.setItem('studentId', res.data.data[0].userId)
               this.$router.push('/ScourseList')
             } else {
+              console.log('123')
               this.error = true
             }
           }
